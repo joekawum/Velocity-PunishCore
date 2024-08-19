@@ -107,10 +107,10 @@ public class BanCommand implements SimpleCommand {
             sender.sendMessage(Component.text(" "));
             for (BanManager.BanReason value : BanManager.BanReason.values()) {
                 sender.sendMessage(Component.text("§b" + value.getId() + " §7| §c" + value.getText() + " §7| §e" + value.getPoints() + " Punkte"));
-                sender.sendMessage(Component.text(" "));
-                sender.sendMessage(Component.text("§7Verwende §c/ban <Spieler> <id>"));
-                sender.sendMessage(Component.text("§7oder §c/ban <Spieler> <[Zeit]min,H,d,M/perma> [Grund]"));
             }
+            sender.sendMessage(Component.text(" "));
+            sender.sendMessage(Component.text("§7Verwende §c/ban <Spieler> <id>"));
+            sender.sendMessage(Component.text("§7oder §c/ban <Spieler> <[Zeit]min,H,d,M/perma> [Grund]"));
         }
     }
 
