@@ -1,9 +1,9 @@
-package de.joekawum.punishCore.commands;
+package de.joekawum.punishCore.commands.ban;
 
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.command.SimpleCommand;
 import de.joekawum.pluginCore.PluginCore;
-import de.joekawum.punishCore.manager.BanManager;
+import de.joekawum.punishCore.manager.ban.BanManager;
 import net.kyori.adventure.text.Component;
 
 import java.sql.SQLException;

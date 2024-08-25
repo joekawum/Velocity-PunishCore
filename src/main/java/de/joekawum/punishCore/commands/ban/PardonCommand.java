@@ -1,4 +1,4 @@
-package de.joekawum.punishCore.commands;
+package de.joekawum.punishCore.commands.ban;
 
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.command.SimpleCommand;

@@ -1,4 +1,4 @@
-package de.joekawum.punishCore.manager;
+package de.joekawum.punishCore.manager.ban;
 
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
@@ -6,9 +6,13 @@ import de.joekawum.pluginCore.PluginCore;
 import net.kyori.adventure.text.Component;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class BanManager {
+
+    public static final List<Player> banNotify = new ArrayList<>();
 
     private final ProxyServer proxyServer;
 
@@ -20,6 +24,9 @@ public class BanManager {
 
     public void banPlayer(UUID uuid, String operator, String reason, long duration, String banScreen) throws SQLException {
         int banId = calculateBanLog() + 1;
+        for (Player player : banNotify) {
+            player.sendMessage(Component.text("§4§lBAN §8>> §e" + PluginCore.instance().uuidFetcher().getUsername(uuid) + " §7wurde von §c" + operator + " §7gebannt! Grund: §e" + reason));
+        }
         Object points = PluginCore.instance().mysql().getValue("Bans", "uuid", uuid.toString(), "points");
         if (points == null || points.equals("null") || points.equals("NULL"))
             points = "0";
@@ -55,6 +62,9 @@ public class BanManager {
     public void banPlayer(UUID uuid, BanReason banReason, String operator) throws SQLException {
         int points = banReason.getPoints();
         int banId = calculateBanLog() + 1;
+        for (Player player : banNotify) {
+            player.sendMessage(Component.text("§4§lBAN §8>> §e" + PluginCore.instance().uuidFetcher().getUsername(uuid) + " §7wurde von §c" + operator + " §7gebannt! Grund: §e" + banReason.getText()));
+        }
         String banScreen = calculateBanText(points);
         if (PluginCore.instance().mysql().valueExists("Bans", "uuid", uuid.toString())) {
             points += ((Integer)PluginCore.instance().mysql().getValue("Bans", "uuid", uuid.toString(), "points")).intValue();
@@ -171,7 +181,7 @@ public class BanManager {
         SUPPORTEXPLOITATION(10, "Supportausnutzung", 3),
         REPORTEXPLOITATION(11, "Reportausnutzung", 3),
         THREAT(12, "Drohung", 5),
-        RANDOMKILLING(13, "Randomkilling (TTT)", 7),
+        TROLLING(13, "Trolling/Griefing", 7),
         BANBYPASS(14, "Banumgehung", 30),
         WARNING(15, "Verwarnung", 1),
         TADEL(16, "Tadel", 2),
