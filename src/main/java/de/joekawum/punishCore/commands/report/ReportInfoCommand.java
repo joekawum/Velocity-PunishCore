@@ -78,12 +78,15 @@ public class ReportInfoCommand implements SimpleCommand {
         else
             player.sendMessage(Component.text("§7Grund: §e" + reason));
 
-        Player sender = reports.getFirst().getSender();
-        if(sender != null) {
-            if (!sender.isActive())
-                player.sendMessage(Component.text("§7Gemeldet von: §c" + sender.getUsername() + (reports.size() > 1 ? " §7§o(" + reports.size() + ")" : "")));
-            else
-                player.sendMessage(Component.text("§7Gemeldet von: §a" + sender.getUsername() + (reports.size() > 1 ? " §7§o(" + reports.size() + ")" : "")));
+        Optional<Player> op2 = this.proxyServer.getPlayer(reports.getFirst().getSender());
+        if(op2.isPresent() && !op2.isEmpty()) {
+            Player sender = op2.get();
+            if (sender != null) {
+                if (!sender.isActive())
+                    player.sendMessage(Component.text("§7Gemeldet von: §c" + sender.getUsername() + (reports.size() > 1 ? " §7§o(" + reports.size() + ")" : "")));
+                else
+                    player.sendMessage(Component.text("§7Gemeldet von: §a" + sender.getUsername() + (reports.size() > 1 ? " §7§o(" + reports.size() + ")" : "")));
+            }
         }
 
         player.sendMessage(Component.text("§7Gemeldet am: §e" + new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(reports.getFirst().getTimestamp()) + " Uhr"));

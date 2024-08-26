@@ -2,13 +2,22 @@ package de.joekawum.punishCore.commands.report;
 
 import com.velocitypowered.api.command.SimpleCommand;
 import com.velocitypowered.api.proxy.Player;
+import com.velocitypowered.api.proxy.ProxyServer;
 import de.joekawum.punishCore.manager.report.Report;
 import de.joekawum.punishCore.manager.report.ReportManager;
 import net.kyori.adventure.text.Component;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public class ReportDenyCommand implements SimpleCommand {
+
+    private final ProxyServer proxyServer;
+
+    public ReportDenyCommand(ProxyServer proxyServer) {
+        this.proxyServer = proxyServer;
+    }
+
     @Override
     public void execute(Invocation invocation) {
         if(!(invocation.source() instanceof Player)) {
@@ -25,9 +34,12 @@ public class ReportDenyCommand implements SimpleCommand {
                         player.sendMessage(Component.text("§cReport abgelehnt!"));
 
                         ReportManager.reportCache.get(uuid).forEach(r -> {
-                            Player sender = r.getSender();
-                            if(sender != null && sender.isActive())
-                                sender.sendMessage(Component.text("§cDein Report wurde abgelehnt und der Spieler NICHT bestraft §7(§e" + r.getId() + "§7)§a."));
+                            Optional<Player> optionalPlayer = this.proxyServer.getPlayer(r.getSender());
+                            if(optionalPlayer.isPresent() && !optionalPlayer.isEmpty()) {
+                                Player sender = optionalPlayer.get();
+                                if (sender != null && sender.isActive())
+                                    sender.sendMessage(Component.text("§cDein Report wurde abgelehnt und der Spieler NICHT bestraft §7(§e" + r.getId() + "§7)§a."));
+                            }
                         });
 
                         ReportManager.reportCache.remove(uuid);

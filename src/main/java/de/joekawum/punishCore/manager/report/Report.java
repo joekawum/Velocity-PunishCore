@@ -9,14 +9,14 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class Report {
 
-    private final Player sender;
+    private final UUID sender;
     private final UUID suspect;
     private final ReportManager.Reasons reason;
     private final long timestamp;
     private final int number;
     private final String id, server;
 
-    public Report(Player sender, UUID suspect, ReportManager.Reasons reason, String server, long timestamp) {
+    public Report(UUID sender, UUID suspect, ReportManager.Reasons reason, String server, long timestamp) {
         this.sender = sender;
         this.suspect = suspect;
         this.reason = reason;
@@ -44,7 +44,25 @@ public class Report {
             ReportManager.reportCache.put(suspect, new LinkedList<>(Collections.singletonList(this)));
     }
 
-    public Player getSender() {
+    public Report(UUID sender, UUID suspect, ReportManager.Reasons reason, String server, long timestamp, String id) {
+        this.sender = sender;
+        this.suspect = suspect;
+        this.reason = reason;
+        this.server = server;
+        this.timestamp = timestamp;
+
+        ReportManager.totalReportAmount++;
+        this.number = ReportManager.totalReportAmount;
+
+        this.id = id;
+
+        if(ReportManager.reportCache.containsKey(suspect))
+            ReportManager.reportCache.get(suspect).add(this);
+        else
+            ReportManager.reportCache.put(suspect, new LinkedList<>(Collections.singletonList(this)));
+    }
+
+    public UUID getSender() {
         return sender;
     }
 

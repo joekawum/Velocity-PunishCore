@@ -10,6 +10,7 @@ import com.velocitypowered.api.plugin.Dependency;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
+import de.joekawum.pluginCore.PluginCore;
 import de.joekawum.punishCore.commands.NotifyCommand;
 import de.joekawum.punishCore.commands.ban.BanCommand;
 import de.joekawum.punishCore.commands.ban.BanHistoryCommand;
@@ -17,8 +18,13 @@ import de.joekawum.punishCore.commands.ban.PardonCommand;
 import de.joekawum.punishCore.commands.report.*;
 import de.joekawum.punishCore.listener.ConnectionListener;
 import de.joekawum.punishCore.manager.ban.BanManager;
+import de.joekawum.punishCore.manager.report.Report;
 import de.joekawum.punishCore.manager.report.ReportManager;
 import org.slf4j.Logger;
+
+import java.sql.SQLException;
+import java.util.List;
+import java.util.UUID;
 
 @Plugin(id = "velocity-punishcore", name = "PunishCore", version = "1.0-SNAPSHOT", dependencies = {
         @Dependency(id = "velocitymysqlfix"),
@@ -54,6 +60,8 @@ public class PunishCore {
 
     @Subscribe
     public void onProxyInitialization(ProxyInitializeEvent event) {
+        logger.info("Initializing plugin...");
+
         CommandManager commandManager = proxyServer.getCommandManager();
 
         this.registerBan(commandManager);
@@ -67,14 +75,59 @@ public class PunishCore {
         proxyServer.getEventManager().register(this, new ConnectionListener());
 
         proxyServer.getChannelRegistrar().register(IDENTIFIER);
+
+        try {
+            List<Object[]> report = PluginCore.instance().mysql().getTable("Report", new String[]{"operator", "suspect", "reason", "server", "timestamp", "id"});
+            if(!report.isEmpty()) {
+                for (Object[] obj : report) {
+                    UUID operator = UUID.fromString((String) obj[0]);
+                    UUID suspect = UUID.fromString((String) obj[1]);
+                    ReportManager.Reasons reason = ReportManager.Reasons.byId((int)obj[2]);
+                    String server = (String) obj[3];
+                    long timestamp = Long.parseLong((String) obj[4]);
+                    String id = (String) obj[5];
+                    new Report(operator, suspect, reason, server, timestamp, id);
+                }
+                logger.info("loaded all reports (" + ReportManager.reportCache.size() + ")...");
+                PluginCore.instance().mysql().deleteTable("Report");
+            } else
+                logger.info("report cache was empty...");
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        logger.info("done.");
     }
 
     @Subscribe
     public void onProxyShutdown(ProxyShutdownEvent event) {
         logger.info("Shutdown process started...");
-        logger.info("Saving storage data...");
+        logger.info("saving storage data...");
 
+        for (UUID uuid : ReportManager.reportCache.keySet()) {
+            for (Report report : ReportManager.reportCache.get(uuid)) {
+                UUID operator = report.getSender();
+                UUID suspect = report.getSuspect();
+                ReportManager.Reasons reason = report.getReason();
+                String server = report.getServer();
+                long timestamp = report.getTimestamp();
+                String id = report.getId();
+                try {
+                    PluginCore.instance().mysql().insertValue("Report", "operator, suspect, reason, server, timestamp, id", new Object[]{
+                            operator.toString(),
+                            suspect.toString(),
+                            reason.getId(),
+                            server,
+                            timestamp,
+                            id
+                    });
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
 
+        logger.info("done.");
 
         //TODO sql saving for report
     }
@@ -90,13 +143,15 @@ public class PunishCore {
 
         CommandMeta pardonMeta = commandManager.metaBuilder("pardon")
                 .aliases("unban").plugin(this).build();
-        commandManager.register(pardonMeta, new PardonCommand());
+        commandManager.register(pardonMeta, new PardonCommand(this.banManager));
+
+        logger.info("registered ban...");
     }
 
     private void registerReport(CommandManager commandManager) {
         CommandMeta reportAcceptMeta = commandManager.metaBuilder("reportaccept")
                 .aliases("acceptreport").plugin(this).build();
-        commandManager.register(reportAcceptMeta, new ReportAcceptCommand());
+        commandManager.register(reportAcceptMeta, new ReportAcceptCommand(this.proxyServer));
 
         CommandMeta reportMeta = commandManager.metaBuilder("report")
                 .plugin(this).build();
@@ -104,7 +159,7 @@ public class PunishCore {
 
         CommandMeta reportDenyMeta = commandManager.metaBuilder("reportdeny")
                 .aliases("denyreport").plugin(this).build();
-        commandManager.register(reportDenyMeta, new ReportDenyCommand());
+        commandManager.register(reportDenyMeta, new ReportDenyCommand(this.proxyServer));
 
         CommandMeta reportInfoMeta = commandManager.metaBuilder("reportinfo")
                 .plugin(this).build();
@@ -117,6 +172,8 @@ public class PunishCore {
         CommandMeta reportTeleportMeta = commandManager.metaBuilder("reportteleport")
                 .aliases("reporttp").plugin(this).build();
         commandManager.register(reportTeleportMeta, new ReportTeleportCommand(this.proxyServer, this.reportManager));
+
+        logger.info("registered report...");
     }
 
 }

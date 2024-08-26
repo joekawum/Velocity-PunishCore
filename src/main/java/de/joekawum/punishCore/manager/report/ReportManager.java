@@ -6,6 +6,7 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
+import de.joekawum.pluginCore.PluginCore;
 import de.joekawum.punishCore.PunishCore;
 
 import java.util.*;
@@ -22,6 +23,8 @@ public class ReportManager {
     public ReportManager(ProxyServer proxyServer){
         // TODO: 13.08.24 init mysql
         this.proxyServer = proxyServer;
+
+        PluginCore.instance().mysql().createTable("Report", "operator VARCHAR(36), suspect VARCHAR(36), reason INT, server VARCHAR(20), timestamp LONG, id VARCHAR(10)");
     }
 
     public void sendTeleportData(Player player, UUID suspect) {
@@ -62,6 +65,9 @@ public class ReportManager {
             this.name = name;
         }
 
+
+        private static final Reasons[] values = values();
+
         private final int id;
         private final String name;
 
@@ -71,6 +77,13 @@ public class ReportManager {
 
         public String getName() {
             return name;
+        }
+
+        public static Reasons byId(int id) {
+            for (Reasons value : values) {
+                if(value.id == id) return value;
+            }
+            return null;
         }
     }
 

@@ -40,9 +40,13 @@ public class ReportCommand implements SimpleCommand {
             if(ReportManager.reportCache.containsKey(suspect.getUniqueId())) {
                 LinkedList<Report> reports = ReportManager.reportCache.get(suspect.getUniqueId());
                 for (Report report : reports) {
-                    if(report.getSender().getUsername().equals(player.getUsername())) {
-                        player.sendMessage(Component.text("§7Du hast den Spieler bereits gemeldet!"));
-                        return;
+                    Optional<Player> op2 = this.proxyServer.getPlayer(report.getSender());
+                    if(op2.isPresent() && !op2.isEmpty()) {
+                        Player sender = op2.get();
+                        if (sender.getUsername().equals(player.getUsername())) {
+                            player.sendMessage(Component.text("§7Du hast den Spieler bereits gemeldet!"));
+                            return;
+                        }
                     }
                 }
             }
@@ -53,7 +57,7 @@ public class ReportCommand implements SimpleCommand {
                     String serverString = "PROXY";
                     if(!currentServer.isEmpty() && currentServer.isPresent())
                         serverString = currentServer.get().getServerInfo().getName();
-                    Report report = new Report(player, suspect.getUniqueId(), value, serverString, System.currentTimeMillis());
+                    Report report = new Report(player.getUniqueId(), suspect.getUniqueId(), value, serverString, System.currentTimeMillis());
                     player.sendMessage(Component.text("§aReport gesendet!"));
 
                     for (Player proxiedPlayer : ReportManager.reportNotify) {
@@ -69,14 +73,6 @@ public class ReportCommand implements SimpleCommand {
                                         .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/reportteleport " + report.getId()))
                                         .hoverEvent(HoverEvent.showText(Component.text("§7§oclick to teleport"))))
                         );
-                        /*
-                        proxiedPlayer.sendMessage("§4§lEINGEHENDER REPORT");
-                        proxiedPlayer.sendMessage("§7UUID: " + report.getSuspect());
-                        proxiedPlayer.sendMessage("§7Reason: " + report.getReason().getName());
-                        proxiedPlayer.sendMessage("§7Sender: " + report.getSender().getName());
-                        proxiedPlayer.sendMessage("§7ID: " + report.getId());
-                        proxiedPlayer.sendMessage("§7When: " + new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(report.getTimestamp()));
-                         */
                     }
                     return;
                 }

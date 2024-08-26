@@ -2,11 +2,17 @@ package de.joekawum.punishCore.commands;
 
 import com.velocitypowered.api.command.SimpleCommand;
 import com.velocitypowered.api.proxy.Player;
+import de.joekawum.pluginCore.PluginCore;
 import de.joekawum.punishCore.manager.ban.BanManager;
 import de.joekawum.punishCore.manager.report.ReportManager;
 import net.kyori.adventure.text.Component;
 
 public class NotifyCommand implements SimpleCommand {
+
+    public NotifyCommand() {
+        PluginCore.instance().mysql().createTable("Notify", "uuid VARCHAR(36), report BOOLEAN, ban BOOLEAN, mute BOOLEAN");
+    }
+
     @Override
     public void execute(Invocation invocation) {
         if(!(invocation.source() instanceof Player)) {
@@ -35,7 +41,7 @@ public class NotifyCommand implements SimpleCommand {
                 }
             }
             else
-                player.sendMessage(Component.text("§cBitte benutze: §7/notify <report§7§o/ban/mute§7>"));
+                player.sendMessage(Component.text("§cBitte benutze: §7/notify <report/ban§7§o/mute§7>"));
         } else
             player.sendMessage(Component.text("§cBitte benutze: §7/notify <report/ban§7§o/mute§7>"));
     }

@@ -45,16 +45,8 @@ public class BanHistoryCommand implements SimpleCommand {
                 sender.sendMessage(Component.text("§7Totale Bans: §e" + filteredTable.size()));
                         sender.sendMessage(Component.text(" "));
                 for (Object[] objects : filteredTable) {
-                    int id = ((Integer)objects[5]).intValue();
-                    String idString = "" + id;
-                    if (id < 10) {
-                        idString = "000" + id;
-                    } else if (id < 100) {
-                        idString = "00" + id;
-                    } else if (id < 1000) {
-                        idString = "0" + id;
-                    }
-                    sender.sendMessage(Component.text("§7Grund: §e" + objects[2] + " §7(§c#" + idString + "§7)"));
+                    String idString = (String) objects[5];
+                    sender.sendMessage(Component.text("§7Grund: §e" + objects[2] + " §7(§c" + idString + "§7)"));
                             sender.sendMessage(Component.text("§7Gebannt von: §e" + objects[1]));
                                     sender.sendMessage(Component.text("§7Gebannt am: §e" + simpleDateFormat.format(new Date(Long.parseLong((String)objects[3])))));
                     long date = Long.parseLong((String)objects[4]);

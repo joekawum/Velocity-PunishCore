@@ -8,22 +8,39 @@ import net.kyori.adventure.text.Component;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class BanManager {
 
+    public static final String ALPHABET = "abcdefghijklmnopqrstuvwxyz";
     public static final List<Player> banNotify = new ArrayList<>();
 
     private final ProxyServer proxyServer;
 
     public BanManager(ProxyServer proxyServer) {
         this.proxyServer = proxyServer;
-        PluginCore.instance().mysql().createTable("Bans", "uuid VARCHAR(36), points INT, operator VARCHAR(16), reason VARCHAR(36), banDate LONG, expireDate LONG, id INT");
-        PluginCore.instance().mysql().createTable("BanLog", "uuid VARCHAR(36), points INT, operator VARCHAR(16), reason VARCHAR(36), banDate LONG, expireDate LONG, id INT");
+        PluginCore.instance().mysql().createTable("Bans", "uuid VARCHAR(36), points INT, operator VARCHAR(16), reason VARCHAR(36), banDate LONG, expireDate LONG, id VARCHAR(10)");
+        PluginCore.instance().mysql().createTable("BanLog", "uuid VARCHAR(36), points INT, operator VARCHAR(16), reason VARCHAR(36), banDate LONG, expireDate LONG, id VARCHAR(10)");
     }
 
     public void banPlayer(UUID uuid, String operator, String reason, long duration, String banScreen) throws SQLException {
         int banId = calculateBanLog() + 1;
+
+        StringBuilder current = new StringBuilder();
+        for (int i = 0; i < 3; i++) {
+            int random = ThreadLocalRandom.current().nextInt(2);
+            char c = ALPHABET.charAt(ThreadLocalRandom.current().nextInt(ALPHABET.length()));
+            String s = String.valueOf(c);
+            if(random > 0)
+                current.append(s);
+            else
+                current.append(s.toUpperCase());
+        }
+
+        String banIdString = "#" + current + "-" + (banId < 10 ? "000" + banId : (banId < 100 ? "00" + banId : (banId < 1000 ? "0" + banId : banId)));
+
         for (Player player : banNotify) {
             player.sendMessage(Component.text("§4§lBAN §8>> §e" + PluginCore.instance().uuidFetcher().getUsername(uuid) + " §7wurde von §c" + operator + " §7gebannt! Grund: §e" + reason));
         }
@@ -34,7 +51,7 @@ public class BanManager {
             PluginCore.instance().mysql().setValue("Bans", "uuid", uuid.toString(), "expireDate", Long.valueOf((duration < 0L) ? -1L : (System.currentTimeMillis() + duration)));
             PluginCore.instance().mysql().setValue("Bans", "uuid", uuid.toString(), "operator", operator);
             PluginCore.instance().mysql().setValue("Bans", "uuid", uuid.toString(), "banDate", Long.valueOf(System.currentTimeMillis()));
-            PluginCore.instance().mysql().setValue("Bans", "uuid", uuid.toString(), "id", Integer.valueOf(banId));
+            PluginCore.instance().mysql().setValue("Bans", "uuid", uuid.toString(), "id", banIdString);
             PluginCore.instance().mysql().setValue("Bans", "uuid", uuid.toString(), "reason", reason);
         } else {
             PluginCore.instance().mysql().insertValue("Bans", "uuid, points, operator, reason, banDate, expireDate, id", new Object[] { uuid
@@ -42,15 +59,18 @@ public class BanManager {
 
                     Long.valueOf(System.currentTimeMillis()),
                     Long.valueOf((duration < 0L) ? -1L : (System.currentTimeMillis() + duration)),
-                    Integer.valueOf(banId) });
+                    banIdString });
         }
         PluginCore.instance().mysql().insertValue("BanLog", "uuid, points, operator, reason, banDate, expireDate, id", new Object[] { uuid
                 .toString(), points, operator, reason,
 
                 Long.valueOf(System.currentTimeMillis()),
                 Long.valueOf((duration < 0L) ? -1L : (System.currentTimeMillis() + duration)),
-                Integer.valueOf(banId) });
-        Player player = proxyServer.getPlayer(uuid).get();
+                banIdString });
+
+        Optional<Player> optionalPlayer = proxyServer.getPlayer(uuid);
+        if(optionalPlayer.isEmpty() || !optionalPlayer.isPresent()) return;
+        Player player = optionalPlayer.get();
         if (player != null && player.isActive())
             if (duration < 0L) {
                 player.disconnect(Component.text("§7Du wurdest §cPERMANENT §7vom Netzwerk gebannt.\n§7Grund: §c" + reason + "\n§c§oDu kannst KEINEN Entbannungsantrag stellen."));
@@ -62,6 +82,20 @@ public class BanManager {
     public void banPlayer(UUID uuid, BanReason banReason, String operator) throws SQLException {
         int points = banReason.getPoints();
         int banId = calculateBanLog() + 1;
+
+        StringBuilder current = new StringBuilder();
+        for (int i = 0; i < 3; i++) {
+            int random = ThreadLocalRandom.current().nextInt(2);
+            char c = ALPHABET.charAt(ThreadLocalRandom.current().nextInt(ALPHABET.length()));
+            String s = String.valueOf(c);
+            if(random > 0)
+                current.append(s);
+            else
+                current.append(s.toUpperCase());
+        }
+
+        String banIdString = "#" + current + "-" + (banId < 10 ? "000" + banId : (banId < 100 ? "00" + banId : (banId < 1000 ? "0" + banId : banId)));
+
         for (Player player : banNotify) {
             player.sendMessage(Component.text("§4§lBAN §8>> §e" + PluginCore.instance().uuidFetcher().getUsername(uuid) + " §7wurde von §c" + operator + " §7gebannt! Grund: §e" + banReason.getText()));
         }
@@ -79,7 +113,7 @@ public class BanManager {
             PluginCore.instance().mysql().setValue("Bans", "uuid", uuid.toString(), "points", Integer.valueOf(points));
             PluginCore.instance().mysql().setValue("Bans", "uuid", uuid.toString(), "operator", operator);
             PluginCore.instance().mysql().setValue("Bans", "uuid", uuid.toString(), "banDate", Long.valueOf(System.currentTimeMillis()));
-            PluginCore.instance().mysql().setValue("Bans", "uuid", uuid.toString(), "id", Integer.valueOf(banId));
+            PluginCore.instance().mysql().setValue("Bans", "uuid", uuid.toString(), "id", banIdString);
             PluginCore.instance().mysql().setValue("Bans", "uuid", uuid.toString(), "reason", banReason.getText());
             PluginCore.instance().mysql().insertValue("BanLog", "uuid, points, operator, reason, banDate, expireDate, id", new Object[] { uuid
                     .toString(),
@@ -88,7 +122,7 @@ public class BanManager {
                     .getText(),
                     Long.valueOf(System.currentTimeMillis()),
                     Long.valueOf((banTime < 0L) ? -1L : (System.currentTimeMillis() + banTime)),
-                    Integer.valueOf(banId) });
+                    banIdString });
         } else {
             long banTime = calculateBan(points);
             if (banTime < 0L) {
@@ -99,7 +133,7 @@ public class BanManager {
                         .getText(),
                         Long.valueOf(System.currentTimeMillis()),
                         Integer.valueOf(-1),
-                        Integer.valueOf(banId) });
+                        banIdString });
             } else {
                 banTime *= 1000L;
                 PluginCore.instance().mysql().insertValue("Bans", "uuid, points, operator, reason, banDate, expireDate, id", new Object[] { uuid
@@ -109,7 +143,7 @@ public class BanManager {
                         .getText(),
                         Long.valueOf(System.currentTimeMillis()),
                         Long.valueOf(System.currentTimeMillis() + banTime),
-                        Integer.valueOf(banId) });
+                        banIdString });
             }
             PluginCore.instance().mysql().insertValue("BanLog", "uuid, points, operator, reason, banDate, expireDate, id", new Object[] { uuid
                     .toString(),
@@ -118,9 +152,11 @@ public class BanManager {
                     .getText(),
                     Long.valueOf(System.currentTimeMillis()),
                     Long.valueOf((banTime < 0L) ? -1L : (System.currentTimeMillis() + banTime)),
-                    Integer.valueOf(banId) });
+                    banIdString});
         }
-        Player player = proxyServer.getPlayer(uuid).get();
+        Optional<Player> optionalPlayer = proxyServer.getPlayer(uuid);
+        if(optionalPlayer.isEmpty() || !optionalPlayer.isPresent()) return;
+        Player player = optionalPlayer.get();
         if (player != null && player.isActive())
             player.disconnect(Component.text("§7Du wurdest " + banScreen + " §7vom Netzwerk gebannt.\n§7Grund: §c" + banReason.getText() + "\n§c§oDu kannst KEINEN Entbannungsantrag stellen."));
     }
@@ -129,6 +165,14 @@ public class BanManager {
         if (!PluginCore.instance().mysql().valueExists("Bans", "uuid", uuid.toString()))
             return false;
         long expireDate = Long.parseLong((String)PluginCore.instance().mysql().getValue("Bans", "uuid", uuid.toString(), "expireDate"));
+        return (System.currentTimeMillis() < expireDate);
+    }
+
+    public boolean isBanned(String id) throws SQLException {
+        if (!PluginCore.instance().mysql().valueExists("Bans", "id", id))
+            return false;
+        long expireDate = Long.parseLong((String)PluginCore.instance().mysql().getValue("Bans", "id", id, "expireDate"));
+        if(expireDate < 0) return true;
         return (System.currentTimeMillis() < expireDate);
     }
 
