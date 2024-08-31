@@ -33,13 +33,7 @@ import java.util.UUID;
 public class PunishCore {
 
     //TODO finish NotifyCommand
-    //TODO add sql for report
-    //TODO add banId to unban (#xxx-0000)
     //TODO add reportLog (each player)
-    //TODO set permission for all commands
-    //TODO add prefix to all messages
-    //TODO translate all messages (to german)
-    //TODO general message edit
 
     public static final MinecraftChannelIdentifier IDENTIFIER = MinecraftChannelIdentifier.from("report:teleport");
 
@@ -128,8 +122,6 @@ public class PunishCore {
         }
 
         logger.info("done.");
-
-        //TODO sql saving for report
     }
 
     private void registerBan(CommandManager commandManager) {

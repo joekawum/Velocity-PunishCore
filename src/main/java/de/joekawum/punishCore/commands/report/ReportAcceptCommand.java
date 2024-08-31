@@ -43,8 +43,6 @@ public class ReportAcceptCommand implements SimpleCommand {
                         });
 
                         ReportManager.reportCache.remove(uuid);
-
-                        // TODO: 14.08.24 improve and finish
                         return;
                     }
                 }

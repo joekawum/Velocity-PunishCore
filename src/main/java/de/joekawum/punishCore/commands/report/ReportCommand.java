@@ -66,7 +66,6 @@ public class ReportCommand implements SimpleCommand {
                     player.sendMessage(Data.text("§aDein Report wurde erstellt §7(§e" + report.getId() + "§7)§a. Es wird sich in Kürze darum gekümmert!"));
 
                     for (Player proxiedPlayer : ReportManager.reportNotify) {
-                        // TODO: 14.08.24 design
                         proxiedPlayer.sendMessage(Component.text("§4§lREPORT §8>> §e" + report.getReason().getName() + " §8>> §e" + report.getServer() + " §8>> " + (suspect.isActive() ? "§a" : "§c") + suspect.getUsername() + " §8[§7" + report.getId() + "§8]"));
 
                         proxiedPlayer.sendMessage(Component.text("§4§lREPORT §8>> ")

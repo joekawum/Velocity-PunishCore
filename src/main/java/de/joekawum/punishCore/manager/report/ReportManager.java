@@ -21,7 +21,6 @@ public class ReportManager {
     private final ProxyServer proxyServer;
 
     public ReportManager(ProxyServer proxyServer){
-        // TODO: 13.08.24 init mysql
         this.proxyServer = proxyServer;
 
         PluginCore.instance().mysql().createTable("Report", "operator VARCHAR(36), suspect VARCHAR(36), reason INT, server VARCHAR(20), timestamp LONG, id VARCHAR(10)");

@@ -59,7 +59,6 @@ public class ReportTeleportCommand implements SimpleCommand {
                         if(!playerServer.equals(suspectServer))
                             player.createConnectionRequest(proxyServer.getServer(suspectServer).get()).connect();
 
-                        // TODO: 13.08.24 teleport mechanic paperserver via pl messaging
                         reportManager.sendTeleportData(player, suspect.getUniqueId());
 
                         player.sendMessage(Data.text("§7Du bist nun auf §e" + suspectServer));
