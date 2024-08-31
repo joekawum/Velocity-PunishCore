@@ -3,9 +3,9 @@ package de.joekawum.punishCore.commands.report;
 import com.velocitypowered.api.command.SimpleCommand;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
+import de.joekawum.punishCore.data.Data;
 import de.joekawum.punishCore.manager.report.Report;
 import de.joekawum.punishCore.manager.report.ReportManager;
-import net.kyori.adventure.text.Component;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -31,14 +31,14 @@ public class ReportAcceptCommand implements SimpleCommand {
             for (UUID uuid : ReportManager.reportCache.keySet()) {
                 for (Report report : ReportManager.reportCache.get(uuid)) {
                     if(report.getId().equals(id)) {
-                        player.sendMessage(Component.text("§aReport angenommen! §7§oBitte vergewissere dich, den Spieler zu bestrafen, da das vom System NICHT übernommen wird!"));
+                        player.sendMessage(Data.text("§aReport angenommen! §7§oBitte vergewissere dich, den Spieler zu bestrafen, da das vom System NICHT übernommen wird!"));
 
                         ReportManager.reportCache.get(uuid).forEach(r -> {
                             Optional<Player> optionalPlayer = this.proxyServer.getPlayer(r.getSender());
                             if(optionalPlayer.isPresent() && !optionalPlayer.isEmpty()) {
                                 Player sender = optionalPlayer.get();
                                 if (sender != null && sender.isActive())
-                                    sender.sendMessage(Component.text("§aDein Report wurde angenommen und der Spieler bestraft §7(§e" + r.getId() + "§7)§a. Vielen Dank für deine Meldung!"));
+                                    sender.sendMessage(Data.text("§aDein Report wurde angenommen und der Spieler bestraft §7(§e" + r.getId() + "§7)§a. Vielen Dank für deine Meldung!"));
                             }
                         });
 
@@ -49,9 +49,9 @@ public class ReportAcceptCommand implements SimpleCommand {
                     }
                 }
             }
-            player.sendMessage(Component.text("§cInvalid report-id!"));
+            player.sendMessage(Data.text("§cBitte gebe eine richtige Report-ID an!"));
         } else
-            player.sendMessage(Component.text("§cBitte benutze: §7/reportaccept <id>"));
+            player.sendMessage(Data.text("§7Verwende §c/reportaccept <id>"));
     }
 
     @Override

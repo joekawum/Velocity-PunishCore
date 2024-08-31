@@ -4,13 +4,12 @@ import com.velocitypowered.api.command.SimpleCommand;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.ServerConnection;
+import de.joekawum.punishCore.data.Data;
 import de.joekawum.punishCore.manager.report.Report;
 import de.joekawum.punishCore.manager.report.ReportManager;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
-import net.kyori.adventure.text.format.TextColor;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -40,13 +39,13 @@ public class ReportTeleportCommand implements SimpleCommand {
                     if(report.getId().equals(id)) {
                         Optional<Player> optionalPlayer = proxyServer.getPlayer(report.getSuspect());
                         if(optionalPlayer.isEmpty() || !optionalPlayer.isPresent()) {
-                            player.sendMessage(Component.text("§cDer gemeldete Spieler ist nicht mehr online!"));
-                            TextComponent textComponent = Component.text("HIER");
-                            textComponent.color(TextColor.fromHexString("#55FF55"));
-                            textComponent.clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/reportdeny " + id));
-
-                            player.sendMessage(Component.text("§cKlicke ").append(textComponent).append(Component.text(" §cum den Report zu löschen!")));
-
+                            player.sendMessage(Data.text("§cDer gemeldete Spieler ist nicht mehr online!"));
+                            player.sendMessage(Data.text("§cKlicke ")
+                                    .append(Component.text("§aHIER")
+                                            .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/reportdeny " + id))
+                                            .hoverEvent(HoverEvent.showText(Component.text("§7§odelete")))
+                                    )
+                                    .append(Component.text(" §cum den Report zu löschen!")));
                             return;
                         }
                         Player suspect = optionalPlayer.get();
@@ -63,9 +62,9 @@ public class ReportTeleportCommand implements SimpleCommand {
                         // TODO: 13.08.24 teleport mechanic paperserver via pl messaging
                         reportManager.sendTeleportData(player, suspect.getUniqueId());
 
-                        player.sendMessage(Component.text("§7Du bist nun auf §e" + suspectServer));
+                        player.sendMessage(Data.text("§7Du bist nun auf §e" + suspectServer));
 
-                        player.sendMessage(Component.text("§4§lREPORT §8>> ")
+                        player.sendMessage(Data.text("")
                                 .append(Component.text("§7[§aACCEPT§7]")
                                                         .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/reportaccept " + report.getId()))
                                                         .hoverEvent(HoverEvent.showText(Component.text("§a§oclick to accept report"))))
@@ -73,14 +72,14 @@ public class ReportTeleportCommand implements SimpleCommand {
                                 .append(Component.text("§7[§cDENY§7]")
                                                 .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/reportdeny " + report.getId()))
                                                 .hoverEvent(HoverEvent.showText(Component.text("§c§oclick to deny report")))));
-                        player.sendMessage(Component.text("§7§othe player will not be automatically banned if the report has been accepted"));
+                        player.sendMessage(Data.text("§7§othe player will not be automatically banned if the report has been accepted"));
                         return;
                     }
                 }
             }
-            player.sendMessage(Component.text("§cInvalid report-id!"));
+            player.sendMessage(Data.text("§cBitte gebe eine richtige Report-ID an!"));
         } else
-            player.sendMessage(Component.text("§cBitte benutze: §7/reportteleport <id>"));
+            player.sendMessage(Data.text("§7Verwende §c/reportteleport <id>"));
     }
 
     @Override

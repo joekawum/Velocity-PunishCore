@@ -1,7 +1,5 @@
 package de.joekawum.punishCore.manager.report;
 
-import com.velocitypowered.api.proxy.Player;
-
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.UUID;

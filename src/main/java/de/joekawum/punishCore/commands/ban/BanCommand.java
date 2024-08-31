@@ -4,6 +4,7 @@ import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.command.SimpleCommand;
 import com.velocitypowered.api.proxy.Player;
 import de.joekawum.pluginCore.PluginCore;
+import de.joekawum.punishCore.data.Data;
 import de.joekawum.punishCore.manager.ban.BanManager;
 import net.kyori.adventure.text.Component;
 
@@ -26,22 +27,22 @@ public class BanCommand implements SimpleCommand {
             try {
                 UUID uuid = PluginCore.instance().uuidFetcher().getUniqueId(args[0]);
                 if (uuid == null) {
-                    sender.sendMessage(Component.text("§cDer Spieler wurde nicht gefunden!"));
+                    sender.sendMessage(Data.text("§cDer Spieler wurde nicht gefunden!"));
                     return;
                 }
                 int id = Integer.parseInt(args[1]);
                 BanManager.BanReason banReason = BanManager.BanReason.byId(id);
                 if (banReason == null) {
-                    sender.sendMessage(Component.text("§cBitte gebe eine richtige Ban-ID an!"));
+                    sender.sendMessage(Data.text("§cBitte gebe eine richtige Reason-ID an!"));
                     return;
                 }
                 this.banManager.banPlayer(uuid, banReason, (sender instanceof Player ? ((Player)sender).getUsername() : "CONSOLE"));
-                sender.sendMessage(Component.text("§aSpieler erfolgreich gebannt!"));
+                sender.sendMessage(Data.text("§aSpieler erfolgreich gebannt!"));
             } catch (SQLException throwables) {
-                sender.sendMessage(Component.text("§cFehlerbeim schreiben in die Datenbank! LOG auf Fehler überprüfen!"));
+                sender.sendMessage(Data.text("§cFehlerbeim schreiben in die Datenbank! LOG auf Fehler überprüfen!"));
                         throwables.printStackTrace();
             } catch (NumberFormatException exception) {
-                sender.sendMessage(Component.text("§cBitte gebe eine richtige Ban-ID an!"));
+                sender.sendMessage(Data.text("§cBitte gebe eine richtige Reason-ID an!"));
                 return;
             }
         } else if (args.length >= 3) {
@@ -49,7 +50,7 @@ public class BanCommand implements SimpleCommand {
                 long timeValue;
                 UUID uuid = PluginCore.instance().uuidFetcher().getUniqueId(args[0]);
                 if (uuid == null) {
-                    sender.sendMessage(Component.text("§cDer Spieler wurde nicht gefunden!"));
+                    sender.sendMessage(Data.text("§cDer Spieler wurde nicht gefunden!"));
                     return;
                 }
                 String time = args[1];
@@ -59,11 +60,11 @@ public class BanCommand implements SimpleCommand {
                         for (int i = 3; i < args.length; i++)
                             str = str + " " + args[i];
                     if (str.length() > 36) {
-                        sender.sendMessage(Component.text("§cBanngrund zu lang! Max. 36 Zeichen erlaubt."));
+                        sender.sendMessage(Data.text("§cBanngrund zu lang! Max. 36 Zeichen erlaubt."));
                         return;
                     }
                     this.banManager.banPlayer(uuid, (sender instanceof Player ? ((Player)sender).getUsername() : "CONSOLE"), str, -1L, "");
-                    sender.sendMessage(Component.text("§aSpieler erfolgreich gebannt!"));
+                    sender.sendMessage(Data.text("§aSpieler erfolgreich gebannt!"));
                     return;
                 }
                 if (time.toLowerCase().endsWith("min")) {
@@ -83,7 +84,7 @@ public class BanCommand implements SimpleCommand {
                     timeValue = i * 2592000000L;
                     time = i + " Monat" + ((i != 1) ? "e" : "");
                 } else {
-                    sender.sendMessage(Component.text("§cBitte gebe eine richtige Zeit an!"));
+                    sender.sendMessage(Data.text("§cBitte gebe eine richtige Zeit an!"));
                     return;
                 }
                 String reason = args[2];
@@ -91,26 +92,26 @@ public class BanCommand implements SimpleCommand {
                     for (int i = 3; i < args.length; i++)
                         reason = reason + " " + args[i];
                 if (reason.length() > 36) {
-                    sender.sendMessage(Component.text("§cBanngrund zu lang! Max. 36 Zeichen erlaubt."));
+                    sender.sendMessage(Data.text("§cBanngrund zu lang! Max. 36 Zeichen erlaubt."));
                     return;
                 }
                 this.banManager.banPlayer(uuid, (sender instanceof Player ? ((Player)sender).getUsername() : "CONSOLE"), reason, timeValue, time);
-                sender.sendMessage(Component.text("§aSpieler erfolgreich gebannt!"));
+                sender.sendMessage(Data.text("§aSpieler erfolgreich gebannt!"));
             } catch (SQLException throwables) {
-                sender.sendMessage(Component.text("§cFehler beim schreiben in die Datenbank! LOG auf Fehler überprüfen!"));
+                sender.sendMessage(Data.text("§cFehler beim schreiben in die Datenbank! LOG auf Fehler überprüfen!"));
                         throwables.printStackTrace();
             } catch (NumberFormatException exception) {
-                sender.sendMessage(Component.text("§cBitte gebe eine richtige Zeit an!"));
+                sender.sendMessage(Data.text("§cBitte gebe eine richtige Zeit an!"));
                 return;
             }
         } else {
             sender.sendMessage(Component.text(" "));
             for (BanManager.BanReason value : BanManager.BanReason.values()) {
-                sender.sendMessage(Component.text("§b" + value.getId() + " §7| §c" + value.getText() + " §7| §e" + value.getPoints() + " Punkte"));
+                sender.sendMessage(Data.text("§b" + value.getId() + " §7| §c" + value.getText() + " §7| §e" + value.getPoints() + " Punkte"));
             }
             sender.sendMessage(Component.text(" "));
-            sender.sendMessage(Component.text("§7Verwende §c/ban <Spieler> <id>"));
-            sender.sendMessage(Component.text("§7oder §c/ban <Spieler> <[Zeit]min,H,d,M/perma> [Grund]"));
+            sender.sendMessage(Data.text("§7Verwende §c/ban <Spieler> <id>"));
+            sender.sendMessage(Data.text("§7oder §c/ban <Spieler> <[Zeit]min,H,d,M/perma> [Grund]"));
         }
     }
 

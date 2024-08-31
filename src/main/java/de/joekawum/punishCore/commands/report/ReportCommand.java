@@ -4,6 +4,7 @@ import com.velocitypowered.api.command.SimpleCommand;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.ServerConnection;
+import de.joekawum.punishCore.data.Data;
 import de.joekawum.punishCore.manager.report.Report;
 import de.joekawum.punishCore.manager.report.ReportManager;
 import net.kyori.adventure.text.Component;
@@ -32,10 +33,14 @@ public class ReportCommand implements SimpleCommand {
         if(args.length == 2) {
             Optional<Player> optionalPlayer = proxyServer.getPlayer(args[0]);
             if(optionalPlayer.isEmpty() || !optionalPlayer.isPresent()) {
-                player.sendMessage(Component.text("§cSuspect isn't online!"));
+                player.sendMessage(Data.text("§cDer Spieler wurde nicht gefunden!"));
                 return;
             }
             Player suspect = optionalPlayer.get();
+            if(suspect.getUsername().equals(player.getUsername())) {
+                player.sendMessage(Data.text("§cDu kannst dich nicht selbst melden!"));
+                return;
+            }
 
             if(ReportManager.reportCache.containsKey(suspect.getUniqueId())) {
                 LinkedList<Report> reports = ReportManager.reportCache.get(suspect.getUniqueId());
@@ -44,7 +49,7 @@ public class ReportCommand implements SimpleCommand {
                     if(op2.isPresent() && !op2.isEmpty()) {
                         Player sender = op2.get();
                         if (sender.getUsername().equals(player.getUsername())) {
-                            player.sendMessage(Component.text("§7Du hast den Spieler bereits gemeldet!"));
+                            player.sendMessage(Data.text("§7Du hast den Spieler bereits gemeldet!"));
                             return;
                         }
                     }
@@ -58,13 +63,13 @@ public class ReportCommand implements SimpleCommand {
                     if(!currentServer.isEmpty() && currentServer.isPresent())
                         serverString = currentServer.get().getServerInfo().getName();
                     Report report = new Report(player.getUniqueId(), suspect.getUniqueId(), value, serverString, System.currentTimeMillis());
-                    player.sendMessage(Component.text("§aReport gesendet!"));
+                    player.sendMessage(Data.text("§aDein Report wurde erstellt §7(§e" + report.getId() + "§7)§a. Es wird sich in Kürze darum gekümmert!"));
 
                     for (Player proxiedPlayer : ReportManager.reportNotify) {
                         // TODO: 14.08.24 design
-                        player.sendMessage(Component.text("§4§lREPORT §8>> §e" + report.getReason().getName() + " §8>> §e" + report.getServer() + " §8>> " + (suspect.isActive() ? "§a" : "§c") + suspect.getUsername() + " §8[§7" + report.getId() + "§8]"));
+                        proxiedPlayer.sendMessage(Component.text("§4§lREPORT §8>> §e" + report.getReason().getName() + " §8>> §e" + report.getServer() + " §8>> " + (suspect.isActive() ? "§a" : "§c") + suspect.getUsername() + " §8[§7" + report.getId() + "§8]"));
 
-                        player.sendMessage(Component.text("§4§lREPORT §8>> ")
+                        proxiedPlayer.sendMessage(Component.text("§4§lREPORT §8>> ")
                                 .append(Component.text("§7[§bDETAILS§7]")
                                         .clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/reportinfo " + report.getId()))
                                         .hoverEvent(HoverEvent.showText(Component.text("§7§oclick for more details"))))
@@ -77,13 +82,13 @@ public class ReportCommand implements SimpleCommand {
                     return;
                 }
             }
-            player.sendMessage(Component.text("§cPlease use a valid reason!"));
+            player.sendMessage(Data.text("§cBitte gebe eine richtige Report-ID an!"));
         } else {
-            player.sendMessage(Component.text("§cReport reasons:"));
+            player.sendMessage(Data.text("§cReport reasons:"));
             for (ReportManager.Reasons value : ReportManager.Reasons.values()) {
-                player.sendMessage(Component.text("§7- §e" + value.getId() + " §7| §e" + value.getName()));
+                player.sendMessage(Data.text("§7- §e" + value.getId() + " §7| §e" + value.getName()));
             }
-            player.sendMessage(Component.text("§cBitte benutze: §7/report <Spieler> <Id>"));
+            player.sendMessage(Data.text("§7Verwende §c/report <Spieler> <Id>"));
         }
     }
 }

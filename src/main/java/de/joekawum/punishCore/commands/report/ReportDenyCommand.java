@@ -3,9 +3,9 @@ package de.joekawum.punishCore.commands.report;
 import com.velocitypowered.api.command.SimpleCommand;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
+import de.joekawum.punishCore.data.Data;
 import de.joekawum.punishCore.manager.report.Report;
 import de.joekawum.punishCore.manager.report.ReportManager;
-import net.kyori.adventure.text.Component;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -31,14 +31,14 @@ public class ReportDenyCommand implements SimpleCommand {
             for (UUID uuid : ReportManager.reportCache.keySet()) {
                 for (Report report : ReportManager.reportCache.get(uuid)) {
                     if(report.getId().equals(id)) {
-                        player.sendMessage(Component.text("§cReport abgelehnt!"));
+                        player.sendMessage(Data.text("§cReport abgelehnt §7(§e" + report.getId() + "§7)§c!"));
 
                         ReportManager.reportCache.get(uuid).forEach(r -> {
                             Optional<Player> optionalPlayer = this.proxyServer.getPlayer(r.getSender());
                             if(optionalPlayer.isPresent() && !optionalPlayer.isEmpty()) {
                                 Player sender = optionalPlayer.get();
                                 if (sender != null && sender.isActive())
-                                    sender.sendMessage(Component.text("§cDein Report wurde abgelehnt und der Spieler NICHT bestraft §7(§e" + r.getId() + "§7)§a."));
+                                    sender.sendMessage(Data.text("§cDein Report wurde abgelehnt und der Spieler NICHT bestraft §7(§e" + r.getId() + "§7)§a."));
                             }
                         });
 
@@ -49,9 +49,9 @@ public class ReportDenyCommand implements SimpleCommand {
                     }
                 }
             }
-            player.sendMessage(Component.text("§cInvalid report-id!"));
+            player.sendMessage(Data.text("§cBitte gebe eine richtige Report-ID an!"));
         } else
-            player.sendMessage(Component.text("§cBitte benutze: §7/reportdeny <id>"));
+            player.sendMessage(Data.text("§7Verwende §c/reportdeny <id>"));
     }
 
     @Override
