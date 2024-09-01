@@ -30,7 +30,7 @@ public class ConnectionListener {
             }
             if (System.currentTimeMillis() < expireDate) {
                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm");
-                player.disconnect(Component.text("§cDu wurdest vom Netzwerk gebannt!\n§7Grund: §c "+ reason + " §7(" + id + ")\n§7Gebanntbis zum: §c" + simpleDateFormat.format(new Date(expireDate)) + " Uhr"));
+                player.disconnect(Component.text("§cDu wurdest vom Netzwerk gebannt!\n§7Grund: §c "+ reason + " §7(" + id + ")\n§7Gebannt bis zum: §c" + simpleDateFormat.format(new Date(expireDate)) + " Uhr"));
             }
         }
 

@@ -83,7 +83,7 @@ public class ReportCommand implements SimpleCommand {
             }
             player.sendMessage(Data.text("§cBitte gebe eine richtige Report-ID an!"));
         } else {
-            player.sendMessage(Data.text("§cReport reasons:"));
+            player.sendMessage(Data.text("§cReport Gründe:"));
             for (ReportManager.Reasons value : ReportManager.Reasons.values()) {
                 player.sendMessage(Data.text("§7- §e" + value.getId() + " §7| §e" + value.getName()));
             }
